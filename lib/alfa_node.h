@@ -17,11 +17,6 @@
 #include "alfa_msg/AlfaAlivePing.h"
 
 
-#define NODE_NAME "alfa_pd"
-
-#define NODE_TYPE "Weather denoising"
-
-
 #define TIMER_SLEEP 50000
 
 
@@ -29,7 +24,7 @@ using namespace std;
 class AlfaNode
 {
 public:
-    AlfaNode();
+    AlfaNode(string node_name,string node_type,vector<alfa_msg::ConfigMessage>* default_configurations);
 
     void publish_pointcloud(pcl::PointCloud<pcl::PointXYZI>::Ptr output_cloud);
     void publish_metrics(alfa_msg::AlfaMetrics &metrics);
@@ -37,7 +32,7 @@ public:
     virtual void process_pointcloud(pcl::PointCloud<pcl::PointXYZI>::Ptr output_cloud);
     virtual alfa_msg::AlfaConfigure::Response   process_config(alfa_msg::AlfaConfigure::Request &req);
 
-    int node_status;
+    int node_status; // tells alfa_monitor what this node is current doing
     virtual ~AlfaNode();
 
 private:
@@ -58,8 +53,11 @@ private:
 
     boost::thread* alive_ticker;
 
+    string node_name;
+    string node_type;
+    vector<alfa_msg::ConfigMessage>* default_configurations;
     void spin();
-
+    uint pcl2_Header_seq;
 };
 
 

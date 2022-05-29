@@ -30,7 +30,7 @@ typedef long long int u64;
 class Alfa_Pd :  public  AlfaNode
 {
 public:
-    Alfa_Pd();
+    Alfa_Pd(string node_name,string node_type,vector<alfa_msg::ConfigMessage>* default_configurations);
     void do_voxelfilter();
     void do_sorfilter();
     void do_drorfilter();

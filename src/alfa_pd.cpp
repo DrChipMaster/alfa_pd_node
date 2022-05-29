@@ -3,7 +3,7 @@
 #include<time.h>
 #include <pcl/common/io.h>
 
-Alfa_Pd::Alfa_Pd()
+Alfa_Pd::Alfa_Pd(string node_name,string node_type,vector<alfa_msg::ConfigMessage>* default_configurations):AlfaNode (node_name,node_type,default_configurations)
 {
     frame_id =0;
     filter_number = 1;
@@ -28,7 +28,7 @@ Alfa_Pd::Alfa_Pd()
          //configs_pointer = (uint32_t *)mmap(NULL, config_size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, config_base_ptr);
     ddr_pointer = (u64 *)mmap(NULL, ddr_size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, ddr_ptr_base);
     configs_pointer = (uint32_t *)mmap(NULL, configs_size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, configs_ptr_base);
-         hardware_ready=1;
+    hardware_ready=1;
     }
 
     outputMetrics.message_tag = "Filter performance";

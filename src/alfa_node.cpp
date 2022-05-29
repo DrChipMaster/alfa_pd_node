@@ -4,12 +4,15 @@
 #include <chrono>
 
 
-AlfaNode::AlfaNode()
+AlfaNode::AlfaNode(string node_name,string node_type,vector<alfa_msg::ConfigMessage>* default_configurations )
 {
-
+    this->node_name = node_name;
+    this->node_type = node_type;
+    this->default_configurations = default_configurations;
+    pcl2_Header_seq = 0;
+    pcloud.reset(new pcl::PointCloud<pcl::PointXYZI>);
     subscribe_topics();
     alive_ticker = new boost::thread(&AlfaNode::ticker_thread,this);
-    pcloud.reset(new pcl::PointCloud<pcl::PointXYZI>);
 
 }
 
@@ -17,13 +20,16 @@ void AlfaNode::publish_pointcloud(pcl::PointCloud<pcl::PointXYZI>::Ptr output_cl
 {
     sensor_msgs::PointCloud2 pcl2_frame;
     pcl::toROSMsg(*output_cloud,pcl2_frame);
+    pcl2_frame.header.frame_id = node_name+"_pointcloud";
+    pcl2_frame.header.seq = pcl2_Header_seq;
+    pcl2_frame.header.stamp = ros::Time::now();
+    pcl2_Header_seq++;
     cloud_publisher.publish(pcl2_frame);
 }
 
 void AlfaNode::publish_metrics(alfa_msg::AlfaMetrics &metrics)
 {
     filter_metrics.publish(metrics);
-
 }
 
 void AlfaNode::process_pointcloud(pcl::PointCloud<pcl::PointXYZI>::Ptr output_cloud)
@@ -72,7 +78,7 @@ void AlfaNode::init()
         char arg0[]= "filter_node";
         char *argv[]={arg0,NULL};
         int argc=(int)(sizeof(argv) / sizeof(char*)) - 1;;
-        ros::init (argc, argv, NODE_NAME);
+        ros::init (argc, argv, node_name);
           if (!ros::master::check()) {
               cout <<"Failed to inicialize ros"<<endl;
             return;
@@ -83,11 +89,11 @@ void AlfaNode::init()
 void AlfaNode::subscribe_topics()
 {
     sub_cloud = nh.subscribe("alfa_pointcloud",1,&AlfaNode::cloud_cb,this);
-    sub_parameters = nh.advertiseService(string(NODE_NAME).append("_settings"),&AlfaNode::parameters_cb,this);
+    sub_parameters = nh.advertiseService(node_name.append("_settings"),&AlfaNode::parameters_cb,this);
     ros::NodeHandle n;
-    filter_metrics = n.advertise<alfa_msg::AlfaMetrics>(string(NODE_NAME).append("_metrics"), 1);
-    alive_publisher = n.advertise<alfa_msg::AlfaAlivePing>(string(NODE_NAME).append("_alive"),1);
-    cloud_publisher = n.advertise<sensor_msgs::PointCloud2>(string(NODE_NAME).append("_cloud"),1);
+    filter_metrics = n.advertise<alfa_msg::AlfaMetrics>(node_name.append("_metrics"), 1);
+    alive_publisher = n.advertise<alfa_msg::AlfaAlivePing>(node_name.append("_alive"),1);
+    cloud_publisher = n.advertise<sensor_msgs::PointCloud2>(node_name.append("_cloud"),1);
     m_spin_thread = new boost::thread(&AlfaNode::spin, this);
 
 
@@ -98,37 +104,11 @@ void AlfaNode::ticker_thread()
     while(ros::ok())
     {
         alfa_msg::AlfaAlivePing newPing;
-        newPing.node_name= NODE_NAME;
-        newPing.node_type = NODE_TYPE;
-        newPing.config_service_name = string(NODE_NAME)+"_settings";
-        newPing.config_tag = "DIOR software example";
-        alfa_msg::ConfigMessage parameter1,parameter2,parameter3,parameter4,parameter5,parameter6;
-
-        parameter1.config = 7;
-        parameter1.config_name = "Filter Selector";
-
-        parameter2.config = 0.1;
-        parameter2.config_name = "Minimal Search Radius:";
-
-        parameter3.config = 0.2;
-        parameter3.config_name = "Multiplication Parameter:";
-
-        parameter4.config = 5;
-        parameter4.config_name = "Neighbor Threshold";
-
-        parameter5.config = 0.005;
-        parameter5.config_name = "Intensity Treshold Parameter:";
-
-        parameter6.config = 4;
-        parameter6.config_name = "Multithreading: Number of threads";
-
-        newPing.default_configurations.push_back(parameter1);
-        newPing.default_configurations.push_back(parameter2);
-        newPing.default_configurations.push_back(parameter3);
-        newPing.default_configurations.push_back(parameter4);
-        newPing.default_configurations.push_back(parameter5);
-        newPing.default_configurations.push_back(parameter6);
-
+        newPing.node_name= node_name;
+        newPing.node_type = node_type;
+        newPing.config_service_name = node_name+"_settings";
+        newPing.config_tag = "Default configuration";
+        newPing.default_configurations = *default_configurations;
         newPing.current_status = node_status;
         alive_publisher.publish(newPing);
         std::this_thread::sleep_for(std::chrono::milliseconds(TIMER_SLEEP));
