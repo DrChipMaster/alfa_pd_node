@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.9.2, 2022-05-23T07:18:28. -->
+<!-- Written by QtCreator 4.9.2, 2022-05-25T06:25:09. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -70,13 +70,8 @@
    <value type="int" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.0">
     <valuelist type="QVariantList" key="CMake.Configuration">
-     <value type="QString">unset CMAKE_BUILD_TYPE</value>
-     <value type="QString">unset CMAKE_CODEBLOCKS_EXECUTABLE</value>
-     <value type="QString">unset CMAKE_CODEBLOCKS_MAKE_ARGUMENTS</value>
      <value type="QString">CMAKE_CXX_COMPILER:STRING=%{Compiler:Executable:Cxx}</value>
      <value type="QString">CMAKE_C_COMPILER:STRING=%{Compiler:Executable:C}</value>
-     <value type="QString">unset CMAKE_INSTALL_PREFIX</value>
-     <value type="QString">unset CMAKE_PREFIX_PATH</value>
      <value type="QString">QT_QMAKE_EXECUTABLE:STRING=%{Qt:qmakeExecutable}</value>
     </valuelist>
     <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/home/andre/QtBuild/Alfa_Pd</value>

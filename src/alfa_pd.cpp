@@ -314,9 +314,9 @@ void Alfa_Pd::decode_pointcloud()
       }
 }
 
-void Alfa_Pd::process_pointcloud(pcl::PointCloud<pcl::PointXYZI>::Ptr output_cloud)
+void Alfa_Pd::process_pointcloud(pcl::PointCloud<pcl::PointXYZI>::Ptr input_cloud)
 {
-    publish_pointcloud(apply_filter(output_cloud));
+    publish_pointcloud(apply_filter(input_cloud));
     publish_metrics(outputMetrics);
 }
 

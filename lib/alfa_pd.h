@@ -75,7 +75,7 @@ private:
     pcl::PointCloud<pcl::PointXYZI>::Ptr inputCloud, outputCloud;
 
 
-    void process_pointcloud(pcl::PointCloud<pcl::PointXYZI>::Ptr output_cloud);
+    void process_pointcloud(pcl::PointCloud<pcl::PointXYZI>::Ptr  input_cloud);
      alfa_msg::AlfaConfigure::Response   process_config(alfa_msg::AlfaConfigure::Request &req);
 
 };
