@@ -10,36 +10,38 @@ AlfaNode::AlfaNode(string node_name,string node_type,vector<alfa_msg::ConfigMess
     this->node_type = node_type;
     this->default_configurations = default_configurations;
     pcl2_Header_seq = 0;
-    pcloud.reset(new pcl::PointCloud<pcl::PointXYZI>);
-    subscribe_topics();
-    alive_ticker = new boost::thread(&AlfaNode::ticker_thread,this);
+    pcloud.reset(new pcl::PointCloud<pcl::PointXYZI>); // Create a new point cloud object
+    init(); //inicialize the ROS enviroment
+    subscribe_topics();  //Subscrive to all the needed topics
+    alive_ticker = new boost::thread(&AlfaNode::ticker_thread,this); //Start the ticker thread that sends the alive message
 
 }
 
-void AlfaNode::publish_pointcloud(pcl::PointCloud<pcl::PointXYZI>::Ptr output_cloud)
+void AlfaNode::publish_pointcloud(pcl::PointCloud<pcl::PointXYZI>::Ptr input_cloud)
 {
     sensor_msgs::PointCloud2 pcl2_frame;
-    pcl::toROSMsg(*output_cloud,pcl2_frame);
-    pcl2_frame.header.frame_id = node_name+"_pointcloud";
+    pcl::toROSMsg(*input_cloud,pcl2_frame);   //conver the pcl object to the pointcloud2 one
+    pcl2_frame.header.frame_id = node_name+"_pointcloud";  // Create the pointcloud2 header to publish
     pcl2_frame.header.seq = pcl2_Header_seq;
     pcl2_frame.header.stamp = ros::Time::now();
     pcl2_Header_seq++;
-    cloud_publisher.publish(pcl2_frame);
+    cloud_publisher.publish(pcl2_frame); //publish the point cloud in the ROS topic
 }
 
 void AlfaNode::publish_metrics(alfa_msg::AlfaMetrics &metrics)
 {
-    node_metrics.publish(metrics);
+    node_metrics.publish(metrics);  // publish the metrics
 }
 
 void AlfaNode::process_pointcloud(pcl::PointCloud<pcl::PointXYZI>::Ptr input_cloud)
 {
-    cout << "Please implement the process_pointcloud function"<<endl;
+    cout << "Please implement the process_pointcloud function"<<endl; //If this line execute, it means that the real function was not implemented. Please implement in the derived node
 }
 
 alfa_msg::AlfaConfigure::Response AlfaNode::process_config(alfa_msg::AlfaConfigure::Request &req)
 {
-    cout << "Please implement the process_config function"<<endl;
+    cout << "Please implement the process_config function"<<endl; //If this line execute, it means that the real function was not implemented. Please implement in the derived node
+}
 
 }
 
@@ -50,26 +52,25 @@ AlfaNode::~AlfaNode()
 
 void AlfaNode::cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud)
 {
-    //cout<<"Recieved pointcloud"<<endl;
     if ((cloud->width * cloud->height) == 0)
     {
         cout <<"Recieved empty point cloud"<<endl;
         return;
     }
-    pcl::fromROSMsg(*cloud,*pcloud);
+    pcl::fromROSMsg(*cloud,*pcloud); //conversion of the pointcloud2 object to the pcl one
 
-    process_pointcloud(pcloud);
+    process_pointcloud(pcloud);  // call the child object with the recived point cloud
 
 }
 
 bool AlfaNode::parameters_cb(alfa_msg::AlfaConfigure::Request &req, alfa_msg::AlfaConfigure::Response &res)
 {
-    cout<<"Recieved FilterSettings with size" <<req.configurations.size()<<"... Updating"<<endl;
+    cout<<"Recieved configurations with size" <<req.configurations.size()<<"... Updating"<<endl;
     for (int i=0; i< req.configurations.size();i++) {
         cout <<"Configuration: "<<i<< " With name: "<< req.configurations[i].config_name<< " with value: "<< req.configurations[i].config<<endl;
     }
 
-    res = process_config(req);
+    res = process_config(req); // process the new configurantion and prepare the result
     return true;
 }
 
@@ -88,7 +89,7 @@ void AlfaNode::init()
 
 void AlfaNode::subscribe_topics()
 {
-    sub_cloud = nh.subscribe("alfa_pointcloud",1,&AlfaNode::cloud_cb,this);
+    sub_cloud = nh.subscribe(string(CLOUD_TOPIC),1,&AlfaNode::cloud_cb,this);  //subscribe 
     sub_parameters = nh.advertiseService(node_name.append("_settings"),&AlfaNode::parameters_cb,this);
     ros::NodeHandle n;
     node_metrics = n.advertise<alfa_msg::AlfaMetrics>(node_name.append("_metrics"), 1);
