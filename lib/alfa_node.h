@@ -22,7 +22,9 @@
 
 #define CLOUD_TOPIC "alfa_pointcloud"  //Name of the subsriver topic where this node gets point clouds
 
-#define DEBUG false
+typedef long long int u64;
+
+//#define DEBUG
 
 using namespace std;
 
@@ -66,6 +68,16 @@ public:
      * @return alfa_msg::AlfaConfigure::Response An int that represents the success of the configurations
      */
     virtual alfa_msg::AlfaConfigure::Response process_config(alfa_msg::AlfaConfigure::Request &req);
+
+
+    virtual void store_pointcloud_hardware(pcl::PointCloud<pcl::PointXYZI>::Ptr input_cloud, u64 *pointer);
+
+    virtual pcl::PointCloud<pcl::PointXYZI>::Ptr  read_hardware_pointcloud(u64 *pointer);
+
+    virtual vector<uint32_t> read_axilite_registers(uint32_t* pointer, uint size);
+
+    virtual void  read_axilite_registers(vector<uint32_t>  data, uint32_t* pointer, uint size);
+
 
     /**
      * @brief Variable responsible for signaling the current state of the node. This status is sent with all the message in the Alive Message that is sent periodically

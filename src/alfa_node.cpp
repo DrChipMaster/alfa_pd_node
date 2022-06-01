@@ -56,11 +56,10 @@ void AlfaNode::cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud)
 {
     if ((cloud->width * cloud->height) == 0)
     {
-        if(DEBUG)
-        {
+        #ifdef DEBUG
             cout <<"Recieved empty point cloud"<<endl;
-        }
-             return;
+        #endif
+        return;
     }
     /**
      * @brief pcl::fromROSMsg
@@ -68,9 +67,9 @@ void AlfaNode::cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud)
      */
     pcl::fromROSMsg(*cloud,*pcloud); //conversion of the pointcloud2 object to the pcl one
 
-    if(DEBUG)
+    #ifdef DEBUG
         cout<<"Recieved a point cloud with: "<< pcloud->size()<<" points"<<endl;
-
+    #endif
     /**
      *@todo
      */
@@ -80,12 +79,11 @@ void AlfaNode::cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud)
 
 bool AlfaNode::parameters_cb(alfa_msg::AlfaConfigure::Request &req, alfa_msg::AlfaConfigure::Response &res)
 {
-    if (DEBUG)
-    {
+    #ifdef DEBUG
         cout<<"Recieved configurations with size" <<req.configurations.size()<<"... Updating"<<endl;
         for (int i=0; i< req.configurations.size();i++) {
             cout <<"Configuration: "<<i<< " With name: "<< req.configurations[i].config_name<< " with value: "<< req.configurations[i].config<<endl;
-        }
+    #endif
     }
 
     res = process_config(req); // process the new configurantion and prepare the result
