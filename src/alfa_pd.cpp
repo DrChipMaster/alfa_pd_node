@@ -262,6 +262,8 @@ void Alfa_Pd::do_hardwarefilter()
     int value = 0;
     int hardware_frame_id=0;
     usleep(10);
+
+
     while (hardware_finish) {
            value = configs_pointer[1];
             if(value >=1)
@@ -316,6 +318,7 @@ void Alfa_Pd::decode_pointcloud()
 
 void Alfa_Pd::process_pointcloud(pcl::PointCloud<pcl::PointXYZI>::Ptr input_cloud)
 {
+
     publish_pointcloud(apply_filter(input_cloud));
     publish_metrics(outputMetrics);
 }

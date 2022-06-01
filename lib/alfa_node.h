@@ -22,7 +22,7 @@
 
 #define CLOUD_TOPIC "alfa_pointcloud"  //Name of the subsriver topic where this node gets point clouds
 
-#define DEBUG False
+#define DEBUG false
 
 using namespace std;
 
