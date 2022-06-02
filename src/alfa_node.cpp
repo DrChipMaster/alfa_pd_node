@@ -4,6 +4,9 @@
 #include <chrono>
 
 
+#define RES_MULTIPLIER 10
+#define INTENSITY_MULTIPLIER 1000
+
 AlfaNode::AlfaNode(string node_name,string node_type,vector<alfa_msg::ConfigMessage>* default_configurations )
 {
     this->node_name = node_name;
@@ -41,6 +44,53 @@ void AlfaNode::process_pointcloud(pcl::PointCloud<pcl::PointXYZI>::Ptr input_clo
 alfa_msg::AlfaConfigure::Response AlfaNode::process_config(alfa_msg::AlfaConfigure::Request &req)
 {
     cout << "Please implement the process_config function"<<endl; //If this line execute, it means that the real function was not implemented. Please implement in the derived node
+}
+
+
+
+void AlfaNode::store_pointcloud_hardware(pcl::PointCloud<pcl::PointXYZI>::Ptr input_cloud, u64 *pointer)
+{
+    int pointcloud_index = 0;
+    int32_t a64_points[2];
+    for (auto point :*input_cloud) {
+        a64_points[0]= ((int16_t)(point.x*RES_MULTIPLIER))+(((int16_t)(point.y*RES_MULTIPLIER))<<16);
+        a64_points[1]=((int16_t)(point.z*100))+(((int16_t)(point.intensity*INTENSITY_MULTIPLIER))<<16);
+        memcpy((void*)(pointer+pointcloud_index),a64_points,sizeof(int32_t)*2);
+        pointcloud_index++;
+    }
+}
+
+
+pcl::PointCloud<pcl::PointXYZI>::Ptr AlfaNode::read_hardware_pointcloud(u64 *pointer, uint size)
+{
+    pcl::PointCloud<pcl::PointXYZI>::Ptr return_cloud;
+    return_cloud.reset(new pcl::PointCloud<pcl::PointXYZI>);
+    for (uint i=0; i<size;i++) {
+        pcl::PointXYZI p;
+        p.x = (pointer[i]&0xF)/RES_MULTIPLIER;
+        p.y = (pointer[i]&0xF0)/RES_MULTIPLIER;
+        p.z = (pointer[i]&0xF00)/RES_MULTIPLIER;
+        p.intensity = (pointer[i]&0xF000)/INTENSITY_MULTIPLIER;
+        return_cloud->push_back(p);
+    }
+    return return_cloud;
+}
+
+vector<uint32_t> AlfaNode::read_axilite_registers(uint32_t *pointer, uint size)
+{
+    vector<uint32_t> return_vector;
+    for (uint var = 0; var < size; ++var) {
+        return_vector.push_back(pointer[var]);
+    }
+    return return_vector;
+}
+
+void AlfaNode::write_axilite_registers(vector<uint32_t> data, uint32_t *pointer, uint offset)
+{
+    for(uint i = offset; i <data.size(); i++)
+    {
+        pointer[i] = data[i];
+    }
 }
 
 
@@ -83,8 +133,8 @@ bool AlfaNode::parameters_cb(alfa_msg::AlfaConfigure::Request &req, alfa_msg::Al
         cout<<"Recieved configurations with size" <<req.configurations.size()<<"... Updating"<<endl;
         for (int i=0; i< req.configurations.size();i++) {
             cout <<"Configuration: "<<i<< " With name: "<< req.configurations[i].config_name<< " with value: "<< req.configurations[i].config<<endl;
+        }
     #endif
-    }
 
     res = process_config(req); // process the new configurantion and prepare the result
     return true;

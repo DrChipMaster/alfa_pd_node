@@ -222,55 +222,51 @@ void Alfa_Pd::do_DIORfilter()
        }
 
 }
-
 using namespace std::chrono;
 
 void Alfa_Pd::do_hardwarefilter()
 {
-    cout<<"inensity:"<<parameter6<<endl;
-    auto start = high_resolution_clock::now();
     frame_id++;
     int intensity_mult;
+    vector<uint32_t> configs;
+    alfa_msg::MetricMessage newMessage;
     if(parameter1 !=1)intensity_mult = parameter6;
-    //cout<<"probs das configs"<<endl;
-    configs_pointer[0]=0;
     uint32_t config = 2+ ((((uint)parameter1)<<2)+((uint)parameter5<<6) +((uint)parameter4<<10)+((uint)parameter2<<14)+((uint)parameter3<<23));
-    //cout << "Storing points!"<<endl;
-       //for (auto &point : *inputCloud)
-   int32_t a_64points[2];
-   for (int var = 0; var < inputCloud->size(); var++)
-   {
-       a_64points[0] = ((int16_t)((*inputCloud)[var].x*100))+(((int16_t)((*inputCloud)[var].y*100+1))<<16);
-       //cout<<"Point.x: " <<hex<<(int16_t)((*inputCloud)[var].x*100)<<"point.y"<<(int16_t)((*inputCloud)[var].y*100)<<endl;
-       a_64points[1]=((int16_t)((*inputCloud)[var].z*100))+(((int16_t)((*inputCloud)[var].intensity*intensity_mult+1))<<16);
-       //cout<<"Point: "<<var<<" :"<<hex<<a_64points[1]<<" "<< hex << a_64points[0]<<endl;
-       memcpy((void*)(ddr_pointer+var),a_64points,sizeof(int32_t)*2);
-   }
+
+    auto start = high_resolution_clock::now();
+
+    store_pointcloud_hardware(inputCloud,ddr_pointer);
+
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(stop - start);
-    alfa_msg::MetricMessage newMessage;
     newMessage.metric = duration.count();
     newMessage.units = "ms";
     newMessage.metric_name = "Storing points";
-
     outputMetrics.metrics.push_back(newMessage);
+
+    configs.push_back(config);
+    configs.push_back(0);
+    configs.push_back(inputCloud->size());
+    configs.push_back(frame_id-1);
+    configs.push_back(frame_id);
+
+    write_axilite_registers(configs,configs_pointer);
+
     start = high_resolution_clock::now();
-    configs_pointer[4]= frame_id;
-    configs_pointer[2]= inputCloud->size();
-    configs_pointer[0] = config;
+
     int hardware_finish =1;
     int value = 0;
     int hardware_frame_id=0;
     usleep(10);
 
-
     while (hardware_finish) {
-           value = configs_pointer[1];
+           vector<uint32_t> hardware_result= read_axilite_registers(configs_pointer,6);
+           value = hardware_result[1];
             if(value >=1)
             {
                 bool frame_differ =1;
                 while (frame_differ) {
-                    hardware_frame_id = configs_pointer[5];
+                    hardware_frame_id = hardware_result[5];
                     if(hardware_frame_id == frame_id)
                     {
                         frame_differ =0;
@@ -281,28 +277,26 @@ void Alfa_Pd::do_hardwarefilter()
             else
                  usleep(1);
     }
-
-    configs_pointer[0] = 0;
-    configs_pointer[1] = 0;
     stop = high_resolution_clock::now();
     duration = duration_cast<milliseconds>(stop - start);
     newMessage.metric = duration.count();
     newMessage.units = "ms";
-    newMessage.metric_name = "Processing points";
+    newMessage.metric_name = "Processing time";
     outputMetrics.metrics.push_back(newMessage);
 
 
     start = high_resolution_clock::now();
-    decode_pointcloud();
+    outputCloud = read_hardware_pointcloud(ddr_pointer,inputCloud->size());
     stop = high_resolution_clock::now();
+
     duration = duration_cast<milliseconds>(stop - start);
     newMessage.metric = duration.count();
     newMessage.units = "ms";
     newMessage.metric_name = "Reading and decoding point cloud";
     outputMetrics.metrics.push_back(newMessage);
 
-
 }
+
 
 void Alfa_Pd::decode_pointcloud()
 {

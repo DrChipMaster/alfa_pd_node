@@ -72,11 +72,11 @@ public:
 
     virtual void store_pointcloud_hardware(pcl::PointCloud<pcl::PointXYZI>::Ptr input_cloud, u64 *pointer);
 
-    virtual pcl::PointCloud<pcl::PointXYZI>::Ptr  read_hardware_pointcloud(u64 *pointer);
+    virtual pcl::PointCloud<pcl::PointXYZI>::Ptr  read_hardware_pointcloud(u64 *pointer, uint size);
 
     virtual vector<uint32_t> read_axilite_registers(uint32_t* pointer, uint size);
 
-    virtual void  read_axilite_registers(vector<uint32_t>  data, uint32_t* pointer, uint size);
+    virtual void  write_axilite_registers(vector<uint32_t>  data, uint32_t* pointer, uint offset = 0);
 
 
     /**
