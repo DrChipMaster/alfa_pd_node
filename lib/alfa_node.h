@@ -74,9 +74,9 @@ public:
 
     virtual pcl::PointCloud<pcl::PointXYZI>::Ptr  read_hardware_pointcloud(u64 *pointer, uint size);
 
-    virtual vector<uint32_t> read_axilite_registers(uint32_t* pointer, uint size);
+    virtual vector<uint32_t> read_hardware_registers(uint32_t* pointer, uint size);
 
-    virtual void  write_axilite_registers(vector<uint32_t>  data, uint32_t* pointer, uint offset = 0);
+    virtual void  write_hardware_registers(vector<uint32_t>  data, uint32_t* pointer, uint offset = 0);
 
 
     /**

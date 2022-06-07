@@ -277,6 +277,8 @@ void Alfa_Pd::do_hardwarefilter()
             else
                  usleep(1);
     }
+
+
     stop = high_resolution_clock::now();
     duration = duration_cast<milliseconds>(stop - start);
     newMessage.metric = duration.count();
