@@ -250,7 +250,7 @@ void Alfa_Pd::do_hardwarefilter()
     configs.push_back(frame_id-1);
     configs.push_back(frame_id);
 
-    write_axilite_registers(configs,configs_pointer);
+    write_hardware_registers(configs,configs_pointer);
 
     start = high_resolution_clock::now();
 
@@ -260,7 +260,7 @@ void Alfa_Pd::do_hardwarefilter()
     usleep(10);
 
     while (hardware_finish) {
-           vector<uint32_t> hardware_result= read_axilite_registers(configs_pointer,6);
+           vector<uint32_t> hardware_result= read_hardware_registers(configs_pointer,6);
            value = hardware_result[1];
             if(value >=1)
             {

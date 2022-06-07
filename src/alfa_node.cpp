@@ -76,7 +76,7 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr AlfaNode::read_hardware_pointcloud(u64 *poi
     return return_cloud;
 }
 
-vector<uint32_t> AlfaNode::read_axilite_registers(uint32_t *pointer, uint size)
+vector<uint32_t> AlfaNode::read_hardware_registers(uint32_t *pointer, uint size)
 {
     vector<uint32_t> return_vector;
     for (uint var = 0; var < size; ++var) {
@@ -85,7 +85,7 @@ vector<uint32_t> AlfaNode::read_axilite_registers(uint32_t *pointer, uint size)
     return return_vector;
 }
 
-void AlfaNode::write_axilite_registers(vector<uint32_t> data, uint32_t *pointer, uint offset)
+void AlfaNode::write_hardware_registers(vector<uint32_t> data, uint32_t *pointer, uint offset)
 {
     for(uint i = offset; i <data.size(); i++)
     {
