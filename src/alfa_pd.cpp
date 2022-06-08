@@ -249,7 +249,7 @@ void Alfa_Pd::do_hardwarefilter()
     configs.push_back(inputCloud->size());
     configs.push_back(frame_id-1);
     configs.push_back(frame_id);
-
+    configs_pointer[0]=0;
     write_hardware_registers(configs,configs_pointer);
 
     start = high_resolution_clock::now();
@@ -278,7 +278,8 @@ void Alfa_Pd::do_hardwarefilter()
                  usleep(1);
     }
 
-
+    configs_pointer[0] = 0;
+    configs_pointer[1] = 0;
     stop = high_resolution_clock::now();
     duration = duration_cast<milliseconds>(stop - start);
     newMessage.metric = duration.count();
