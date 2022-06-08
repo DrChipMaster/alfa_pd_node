@@ -72,10 +72,10 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr AlfaNode::read_hardware_pointcloud(u64 *poi
         pcl::PointXYZI p;
         int32_t a64_points[2];
         memcpy((void*)(a64_points), pointer+i,sizeof(int32_t)*2);
-        p.x = (a64_points[0]&0xF)/RES_MULTIPLIER;
-        p.y = (a64_points[0]&0xF0)/RES_MULTIPLIER;
-        p.z = (a64_points[1]&0xF)/RES_MULTIPLIER;
-        p.intensity = (a64_points[1]&0xF0)/INTENSITY_MULTIPLIER;
+        p.x = (a64_points[0]&0xFFFF)/RES_MULTIPLIER;
+        p.y = (a64_points[0]&0xFFFF0000)/RES_MULTIPLIER;
+        p.z = (a64_points[1]&0xFFFF)/RES_MULTIPLIER;
+        p.intensity = (a64_points[1]&0xFFFF0000)/INTENSITY_MULTIPLIER;
         #ifdef debug
 
         cout<< "First bits: "<< hex<< a64_points[0]<< " Secound bits: "<< hex<< a64_points[1]<<endl;
