@@ -71,8 +71,8 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr AlfaNode::read_hardware_pointcloud(u64 *poi
         memcpy((void*)(a64_points), pointer+i,sizeof(int32_t)*2);
         p.x = (a64_points[0]&0xF)/RES_MULTIPLIER;
         p.y = (a64_points[0]&0xF0)/RES_MULTIPLIER;
-        p.z = (a64_points[1]&0xF00)/RES_MULTIPLIER;
-        p.intensity = (a64_points[1]&0xF000)/INTENSITY_MULTIPLIER;
+        p.z = (a64_points[1]&0xF)/RES_MULTIPLIER;
+        p.intensity = (a64_points[1]&0xF0)/INTENSITY_MULTIPLIER;
         return_cloud->push_back(p);
     }
     return return_cloud;
