@@ -243,15 +243,16 @@ void Alfa_Pd::do_hardwarefilter()
     newMessage.units = "ms";
     newMessage.metric_name = "Storing points";
     outputMetrics.metrics.push_back(newMessage);
-
-    configs.push_back(config);
+    configs_pointer[0]=0;
+    configs.push_back(0);
     configs.push_back(0);
     configs.push_back(inputCloud->size());
     configs.push_back(frame_id-1);
     configs.push_back(frame_id);
-    configs_pointer[0]=0;
-    write_hardware_registers(configs,configs_pointer);
 
+    write_hardware_registers(configs,configs_pointer);
+    configs[0] = config;
+    write_hardware_registers(configs,configs_pointer);
     start = high_resolution_clock::now();
 
     int hardware_finish =1;
