@@ -8,8 +8,6 @@
 #define INTENSITY_MULTIPLIER 1000
 
 
-#define debug
-
 AlfaNode::AlfaNode(string node_name,string node_type,vector<alfa_msg::ConfigMessage>* default_configurations )
 {
     this->node_name = node_name;
@@ -70,13 +68,13 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr AlfaNode::read_hardware_pointcloud(u64 *poi
     return_cloud.reset(new pcl::PointCloud<pcl::PointXYZI>);
     for (uint i=0; i<size;i++) {
         pcl::PointXYZI p;
-        int32_t a64_points[2];
-        memcpy((void*)(a64_points), pointer+i,sizeof(int32_t)*2);
-        p.x = (a64_points[0]&0xFFFF)/RES_MULTIPLIER;
-        p.y = (a64_points[0]&0xFFFF0000)/RES_MULTIPLIER;
-        p.z = (a64_points[1]&0xFFFF)/RES_MULTIPLIER;
-        p.intensity = (a64_points[1]&0xFFFF0000)/INTENSITY_MULTIPLIER;
-        #ifdef debug
+        int16_t a16_points[4];
+        memcpy((void*)(a16_points), pointer+i,sizeof(int16_t)*4);
+        p.x = (a16_points[0])/RES_MULTIPLIER;
+        p.y = (a16_points[1])/RES_MULTIPLIER;
+        p.z = (a16_points[2])/RES_MULTIPLIER;
+        p.intensity = (a16_points[3])/INTENSITY_MULTIPLIER;
+        #ifdef DEBUG
 
         cout<< "First bits: "<< hex<< a64_points[0]<< " Secound bits: "<< hex<< a64_points[1]<<endl;
         cout << "Obtained coordinate: X:"<< hex<< p.x<< "; Y: "<<hex <<p.y<< "; Z: "<<hex<<p.z<< "; Intensity: "<<p.intensity<<endl;
