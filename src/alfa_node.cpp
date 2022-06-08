@@ -74,12 +74,13 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr AlfaNode::read_hardware_pointcloud(u64 *poi
         p.y = (a16_points[1])/float(RES_MULTIPLIER);
         p.z = (a16_points[2])/float(RES_MULTIPLIER);
         p.intensity = (a16_points[3])/float(INTENSITY_MULTIPLIER);
+        return_cloud->push_back(p);
         #ifdef DEBUG
 
         cout<< "First bits: "<< hex<< a16_points[0]<< " Secound bits: "<< hex<< a16_points[1]<<endl;
         cout << "Obtained coordinate: X:"<< hex<< p.x<< "; Y: "<<hex <<p.y<< "; Z: "<<hex<<p.z<< "; Intensity: "<<p.intensity<<endl;
-        return_cloud->push_back(p);
         #endif
+
     }
     return return_cloud;
 }
