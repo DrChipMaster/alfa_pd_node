@@ -6,7 +6,7 @@
 
 #define RES_MULTIPLIER 10
 #define INTENSITY_MULTIPLIER 1000
-
+#define DEBUG
 
 AlfaNode::AlfaNode(string node_name,string node_type,vector<alfa_msg::ConfigMessage>* default_configurations )
 {
@@ -76,7 +76,7 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr AlfaNode::read_hardware_pointcloud(u64 *poi
         p.intensity = (a16_points[3])/INTENSITY_MULTIPLIER;
         #ifdef DEBUG
 
-        cout<< "First bits: "<< hex<< a64_points[0]<< " Secound bits: "<< hex<< a64_points[1]<<endl;
+        cout<< "First bits: "<< hex<< a16_points[0]<< " Secound bits: "<< hex<< a16_points[1]<<endl;
         cout << "Obtained coordinate: X:"<< hex<< p.x<< "; Y: "<<hex <<p.y<< "; Z: "<<hex<<p.z<< "; Intensity: "<<p.intensity<<endl;
         return_cloud->push_back(p);
         #endif
