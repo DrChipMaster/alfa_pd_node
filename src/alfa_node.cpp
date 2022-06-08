@@ -52,11 +52,15 @@ alfa_msg::AlfaConfigure::Response AlfaNode::process_config(alfa_msg::AlfaConfigu
 void AlfaNode::store_pointcloud_hardware(pcl::PointCloud<pcl::PointXYZI>::Ptr input_cloud, u64 *pointer)
 {
     int pointcloud_index = 0;
-    int32_t a64_points[2];
+    int16_t a16_points[4];
     for (auto point :*input_cloud) {
-        a64_points[0]= ((int16_t)(point.x*RES_MULTIPLIER))+(((int16_t)(point.y*RES_MULTIPLIER))<<16);
-        a64_points[1]=((int16_t)(point.z*100))+(((int16_t)(point.intensity*INTENSITY_MULTIPLIER))<<16);
-        memcpy((void*)(pointer+pointcloud_index),a64_points,sizeof(int32_t)*2);
+        a16_points[0] = point.x*RES_MULTIPLIER;
+        a16_points[1] = point.y*RES_MULTIPLIER;
+        a16_points[2] = point.z*RES_MULTIPLIER;
+        a16_points[3] = point.intensity*INTENSITY_MULTIPLIER;
+        //a64_points[0]= ((int16_t)(point.x*RES_MULTIPLIER))+(((int16_t)(point.y*RES_MULTIPLIER))<<16);
+        //a64_points[1]=((int16_t)(point.z*RES_MULTIPLIER))+(((int16_t)(point.intensity*INTENSITY_MULTIPLIER))<<16);
+        memcpy((void*)(pointer+pointcloud_index),a16_points,sizeof(int16_t)*4);
         pointcloud_index++;
     }
 }
