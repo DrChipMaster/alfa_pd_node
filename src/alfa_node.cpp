@@ -6,7 +6,7 @@
 
 #define RES_MULTIPLIER 10
 #define INTENSITY_MULTIPLIER 1000
-#define DEBUG
+//#define DEBUG
 
 AlfaNode::AlfaNode(string node_name,string node_type,vector<alfa_msg::ConfigMessage>* default_configurations )
 {
@@ -70,10 +70,10 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr AlfaNode::read_hardware_pointcloud(u64 *poi
         pcl::PointXYZI p;
         int16_t a16_points[4];
         memcpy((void*)(a16_points), pointer+i,sizeof(int16_t)*4);
-        p.x = (a16_points[0])/RES_MULTIPLIER;
-        p.y = (a16_points[1])/RES_MULTIPLIER;
-        p.z = (a16_points[2])/RES_MULTIPLIER;
-        p.intensity = (a16_points[3])/INTENSITY_MULTIPLIER;
+        p.x = (a16_points[0])/float(RES_MULTIPLIER);
+        p.y = (a16_points[1])/float(RES_MULTIPLIER);
+        p.z = (a16_points[2])/float(RES_MULTIPLIER);
+        p.intensity = (a16_points[3])/float(INTENSITY_MULTIPLIER);
         #ifdef DEBUG
 
         cout<< "First bits: "<< hex<< a16_points[0]<< " Secound bits: "<< hex<< a16_points[1]<<endl;
