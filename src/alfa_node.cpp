@@ -114,7 +114,7 @@ AlfaNode::~AlfaNode()
 }
 
 
-
+#ifndef HARDWARE
 void AlfaNode::cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud)
 {
     if ((cloud->width * cloud->height) == 0)
@@ -133,12 +133,19 @@ void AlfaNode::cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud)
     #ifdef DEBUG
         cout<<"Recieved a point cloud with: "<< pcloud->size()<<" points"<<endl;
     #endif
-    /**
-     *@todo
-     */
+        
     process_pointcloud(pcloud);  // call the child object with the recived point cloud
-
+    
 }
+#endif
+
+
+#ifdef HARDWARE
+void AlfaNode::cloud_hcb()
+{
+    
+}
+#endif
 
 bool AlfaNode::parameters_cb(alfa_msg::AlfaConfigure::Request &req, alfa_msg::AlfaConfigure::Response &res)
 {

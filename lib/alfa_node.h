@@ -78,6 +78,7 @@ public:
 
     virtual void  write_hardware_registers(vector<uint32_t>  data, uint32_t* pointer, uint offset = 0);
 
+    
 
     /**
      * @brief Variable responsible for signaling the current state of the node. This status is sent with all the message in the Alive Message that is sent periodically
@@ -87,12 +88,25 @@ public:
     virtual ~AlfaNode();
 
 private:
+
+    #ifndef HARDWARE
     /**
      * @brief Callback of the subcrived point cloud topic. Every point cloud published will trigger a call to this function where the point cloud is converted to the
      *  pcl XYZI format
      */
     void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud); 
-
+    
+    /**
+     * @brief The point cloud subscriver
+     * 
+     */
+    ros::Subscriber sub_cloud;
+    #endif
+    #ifdef HARDWARE
+    void cloud_hcb();
+    ros::Publisher hardware_cloud_publisher;
+    
+    #endif
     /**
      * @brief Callback of the configuration service that this node class provides. It receives a set of configurations and sends the configuration result, if it was
      * successfully or not
@@ -104,11 +118,6 @@ private:
      */
     bool parameters_cb(alfa_msg::AlfaConfigure::Request &req, alfa_msg::AlfaConfigure::Response &res);
 
-    /**
-     * @brief The point cloud subscriver
-     * 
-     */
-    ros::Subscriber sub_cloud;
 
     /**
      * @brief the service server of the configurations
