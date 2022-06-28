@@ -25,6 +25,7 @@
 typedef long long int u64;
 
 //#define DEBUG
+//#define HARDWARE
 
 using namespace std;
 
@@ -69,13 +70,39 @@ public:
      */
     virtual alfa_msg::AlfaConfigure::Response process_config(alfa_msg::AlfaConfigure::Request &req);
 
-
+    /**
+     * @brief store_pointcloud_hardware Stores a entire point cloud in the given memory regions. Every point in this point cloud
+     * is converted to a 64bits memory possition
+     *
+     * @param input_cloud The point cloud that will be saved
+     * @param pointer The pointer to the first position of the memory region where the point cloud will be saved
+     */
     virtual void store_pointcloud_hardware(pcl::PointCloud<pcl::PointXYZI>::Ptr input_cloud, u64 *pointer);
 
+    /**
+     * @brief read_hardware_pointcloud Reads and returns a point cloud. This point cloud is converted from 64bits points to the pcl format
+     *
+     * @param pointer The pointer to the first position of the memory region where the point cloud will be read
+     * @param size The number of points to be read from the memory
+     * @return Returns a pcl object with points in the PointXYZI format
+     */
     virtual pcl::PointCloud<pcl::PointXYZI>::Ptr  read_hardware_pointcloud(u64 *pointer, uint size);
 
+    /**
+     * @brief read_hardware_registers Reads a user-defined number of 32bits registers. Useful to communicate with AXI-Lite registers
+     * @param pointer The pointer to the register that will be read
+     * @param size The number of registers to be read by this function
+     * @return A vector containing all the registers thar where read
+     */
     virtual vector<uint32_t> read_hardware_registers(uint32_t* pointer, uint size);
 
+
+    /**
+     * @brief write_hardware_registers Writes a user-defined number of 32bits registers. Useful to communicate with AXI-Lite registers
+     * @param data The data that will be stored in the 32bit registers
+     * @param pointer The pointer to the register that will be stored
+     * @param offset Offset from the pointer to skip some registers
+     */
     virtual void  write_hardware_registers(vector<uint32_t>  data, uint32_t* pointer, uint offset = 0);
 
     
@@ -103,9 +130,21 @@ private:
     ros::Subscriber sub_cloud;
     #endif
     #ifdef HARDWARE
+    /**
+     * @brief cloud_hcb Callback that is triggered by an hardware interrupt, and reads a point cloud.
+     */
     void cloud_hcb();
+
+    /**
+     * @brief publish_pointcloud publish the pointcloud that was gathered from the hardware layers
+     * @param input_cloud
+     */
+    void publish_hardware_pointcloud(pcl::PointCloud<pcl::PointXYZI>::Ptr input_cloud);
+
+    /**
+     * @brief hardware_cloud_publisher publisher of the hardware point cloud
+     */
     ros::Publisher hardware_cloud_publisher;
-    
     #endif
     /**
      * @brief Callback of the configuration service that this node class provides. It receives a set of configurations and sends the configuration result, if it was

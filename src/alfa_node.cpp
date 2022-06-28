@@ -58,8 +58,6 @@ void AlfaNode::store_pointcloud_hardware(pcl::PointCloud<pcl::PointXYZI>::Ptr in
         a16_points[1] = point.y*RES_MULTIPLIER;
         a16_points[2] = point.z*RES_MULTIPLIER;
         a16_points[3] = point.intensity*INTENSITY_MULTIPLIER;
-        //a64_points[0]= ((int16_t)(point.x*RES_MULTIPLIER))+(((int16_t)(point.y*RES_MULTIPLIER))<<16);
-        //a64_points[1]=((int16_t)(point.z*RES_MULTIPLIER))+(((int16_t)(point.intensity*INTENSITY_MULTIPLIER))<<16);
         memcpy((void*)(pointer+pointcloud_index),a16_points,sizeof(int16_t)*4);
         pointcloud_index++;
     }
@@ -114,6 +112,7 @@ AlfaNode::~AlfaNode()
 }
 
 
+
 #ifndef HARDWARE
 void AlfaNode::cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud)
 {
@@ -143,7 +142,22 @@ void AlfaNode::cloud_cb(const sensor_msgs::PointCloud2ConstPtr &cloud)
 #ifdef HARDWARE
 void AlfaNode::cloud_hcb()
 {
-    
+    /**
+      @todo Exectution flow when the hardware triggers an interrupt
+
+      */
+    publish_hardware_pointcloud(pcloud);
+}
+
+void AlfaNode::publish_hardware_pointcloud(pcl::PointCloud<pcl::PointXYZI>::Ptr input_cloud)
+{
+    sensor_msgs::PointCloud2 pcl2_frame;
+    pcl::toROSMsg(*input_cloud,pcl2_frame);   //conver the pcl object to the pointcloud2 one
+    pcl2_frame.header.frame_id = node_name+"_hardware_pointcloud";  // Create the pointcloud2 header to publish
+    pcl2_frame.header.seq = pcl2_Header_seq;
+    pcl2_frame.header.stamp = ros::Time::now();
+    pcl2_Header_seq++;
+    hardware_cloud_publisher.publish(pcl2_frame);
 }
 #endif
 
@@ -175,12 +189,18 @@ void AlfaNode::init()
 
 void AlfaNode::subscribe_topics()
 {
-    sub_cloud = nh.subscribe(string(CLOUD_TOPIC),1,&AlfaNode::cloud_cb,this);  //subscribe 
-    sub_parameters = nh.advertiseService(node_name.append("_settings"),&AlfaNode::parameters_cb,this);
+
+    #ifndef HARDWARE
+        sub_cloud = nh.subscribe(string(CLOUD_TOPIC),1,&AlfaNode::cloud_cb,this);  //subscribe
+    #endif
+    sub_parameters = nh.advertiseService(string(node_name).append("_settings"),&AlfaNode::parameters_cb,this);
     ros::NodeHandle n;
-    node_metrics = n.advertise<alfa_msg::AlfaMetrics>(node_name.append("_metrics"), 1);
-    alive_publisher = n.advertise<alfa_msg::AlfaAlivePing>(node_name.append("_alive"),1);
-    cloud_publisher = n.advertise<sensor_msgs::PointCloud2>(node_name.append("_cloud"),1);
+    #ifdef HARDWARE
+        hardware_cloud_publisher = n.advertise<sensor_msgs::PointCloud2>(node_name.append("_hardware_cloud"),1);
+    #endif
+    node_metrics = n.advertise<alfa_msg::AlfaMetrics>(string(node_name).append("_metrics"), 1);
+    alive_publisher = n.advertise<alfa_msg::AlfaAlivePing>(string(node_name).append("_alive"),1);
+    cloud_publisher = n.advertise<sensor_msgs::PointCloud2>(string(node_name).append("_cloud"),1);
     m_spin_thread = new boost::thread(&AlfaNode::spin, this);
 
 
