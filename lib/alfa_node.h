@@ -112,6 +112,7 @@ public:
      * 
      */
     int node_status;
+    vector<alfa_msg::ConfigMessage> *default_configurations;
     virtual ~AlfaNode();
 
 private:
@@ -226,7 +227,6 @@ private:
 
     string node_name;
     string node_type;
-    vector<alfa_msg::ConfigMessage> *default_configurations;
     void spin();
     uint pcl2_Header_seq;
 };
